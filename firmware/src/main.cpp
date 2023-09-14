@@ -30,7 +30,7 @@ static const char *m_broker_username = "emqx";
 static const char *m_broker_password = "public";
 
 static const char *m_topic_command = "DIET-4073c85645649a02734/command";
-static const char *m_topic_discover = "DIET-4073c85645649a02734/disctover";
+static const char *m_topic_discover = "DIET-4073c85645649a02734/discover";
 static const char *m_topic_state = "DIET-4073c85645649a02734/state";
 
 // Instances
@@ -70,22 +70,20 @@ void setup()
         Serial.println("Connecting to WiFi...");
     }
 
-    Serial.printf("Connected to the WiFi network: %s", m_ssid);
+    Serial.printf("Connected to the WiFi network: %s\r\n", m_ssid);
     // connecting to a mqtt broker
     m_client.setServer(m_broker, 1883);
     m_client.setCallback(callback);
     while (!m_client.connected())
     {
-        String client_id = "esp8266-client";
+        String client_id = "esp8266-client-";
         client_id += String(WiFi.macAddress());
-        Serial.printf("The client %s connects to the public mqtt broker\n", client_id.c_str());
         if (!m_client.connect(client_id.c_str(), m_broker_username, m_broker_password))
         {
-            Serial.print("failed with state ");
-            Serial.print(m_client.state());
+            Serial.printf("Connection Failed! Code: %d", m_client.state());
             delay(2000);
         }
-        delay(500);
+        delay(1000);
     }
     // Subscribe to topic sets
     m_client.subscribe(m_topic_command);
@@ -103,7 +101,9 @@ void loop()
     if (t_now - t_dscvr > 5000)
     {
         static char dscvr_msg[101]; // Max + NULL
-        snprintf(dscvr_msg, 100, "MAC: 00:00:00:00:00:01, IP: 192.168.1.1");
+        snprintf(dscvr_msg, 100, "MAC: %s, IP: %s",
+                 WiFi.macAddress().c_str(),
+                 WiFi.localIP().toString().c_str());
         m_client.publish(m_topic_discover, dscvr_msg);
         t_dscvr = t_now;
     }
