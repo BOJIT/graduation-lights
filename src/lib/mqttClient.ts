@@ -12,11 +12,15 @@
 
 import * as mqtt from 'mqtt/dist/mqtt.min';
 
+import { writable, type Writable } from 'svelte/store';
+
 /*--------------------------------- State ------------------------------------*/
 
 const TOPIC_PREFIX = "DIET-4073c85645649a02734";
 
 let client: mqtt.MqttClient | null = null;
+
+let devices: Writable<Set<string>> = writable(new Set([]));
 
 /*------------------------------- Functions ----------------------------------*/
 
@@ -28,10 +32,25 @@ async function connect() {
         client = await mqtt.connectAsync("ws://broker.emqx.io:8083/mqtt");
     }
 
+    // Core subtopics
+    await subscribe("discover");
+
     // Set up message handler
     client.on('message', function (topic, payload, packet) {
-        // Payload is Buffer
-        console.log(`Topic: ${topic}, Message: ${payload.toString()}`)
+
+        // Add discovery entries to set
+        if (topic === `${TOPIC_PREFIX}/discover`) {
+            devices.update((d) => {
+                d.add(payload.toString());
+                return d;
+            });
+            // TODO add callback after 20 seconds to remove from list if not heard from
+
+        } else {
+            // Payload is Buffer
+            console.log(`Topic: ${topic}, Message: ${payload.toString()}`)
+        }
+
     })
 
     return client;
@@ -50,5 +69,7 @@ async function subscribe(subtopic: string) {
 }
 
 /*-------------------------------- Exports -----------------------------------*/
+
+export { devices };
 
 export default { connect, publish, subscribe };

@@ -20,10 +20,6 @@
 
     import mqttClient from "$lib/mqttClient";
 
-    /*--------------------------------- Types --------------------------------*/
-
-    // type Mode = "Off" | "Pattern 1" | "Pattern 2" | "Pattern 3" | "Pattern 4";
-
     /*--------------------------------- Props --------------------------------*/
 
     let options = ["Off", "Pattern 1", "Pattern 2", "Pattern 3", "Pattern 4"];
@@ -36,7 +32,7 @@
     /*-------------------------------- Methods -------------------------------*/
 
     async function setState() {
-        const commandString = `m:${mode}\nh:${hex}`;
+        const commandString = `mode :${mode}, colour :${hex}`;
 
         if (messageTimeout !== null) window.clearTimeout(messageTimeout);
 
@@ -53,6 +49,7 @@
         // Connect to MQTT Broker
         await mqttClient.connect();
         await mqttClient.subscribe("command");
+        await mqttClient.subscribe("discover");
     });
 </script>
 
