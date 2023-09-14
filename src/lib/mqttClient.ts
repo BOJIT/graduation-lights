@@ -73,6 +73,15 @@ async function connect() {
             });
             // TODO add callback after 20 seconds to remove from list if not heard from
 
+        } else if (topic === `${TOPIC_PREFIX}/command`) {
+            const msg = JSON.parse(payload.toString());
+
+            // TODO check if it came from me!
+            state.update((s) => {
+                s.mode = msg.mode;
+                s.colour = msg.colour;
+                return s;
+            });
         } else {
             // Payload is Buffer
             console.log(`Topic: ${topic}, Message: ${payload.toString()}`)

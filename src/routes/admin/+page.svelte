@@ -57,7 +57,7 @@
     <Switch label="Lock Settings" />
     <br /><br />
 
-    <h4>Connected Devices</h4>
+    <h4>Connected Devices ({$devices.size})</h4>
     <hr />
     <SearchableList items={$deviceObject} />
 </Content>
