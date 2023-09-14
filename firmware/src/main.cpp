@@ -26,9 +26,12 @@ static const char *m_psk = WIFI_PSK;   // Enter WiFi password
 
 // MQTT Broker
 static const char *m_broker = "broker.emqx.io";
-static const char *m_topic = "DIET-4073c85645649a02734/command";
 static const char *m_broker_username = "emqx";
 static const char *m_broker_password = "public";
+
+static const char *m_topic_command = "DIET-4073c85645649a02734/command";
+static const char *m_topic_discover = "DIET-4073c85645649a02734/disctover";
+static const char *m_topic_state = "DIET-4073c85645649a02734/state";
 
 // Instances
 static WiFiClient m_espClient;
@@ -57,7 +60,7 @@ void setup()
 
     Serial.println("Program Init");
     Serial.print("Device MAC Address: ");
-    Serial.print(WiFi.macAddress());
+    Serial.println(WiFi.macAddress());
 
     // connecting to a WiFi network
     WiFi.begin(m_ssid, m_psk);
@@ -82,14 +85,26 @@ void setup()
             Serial.print(m_client.state());
             delay(2000);
         }
+        delay(500);
     }
     // Subscribe to topic sets
-    m_client.subscribe(m_topic);
+    m_client.subscribe(m_topic_command);
+    m_client.subscribe(m_topic_state);
 }
 
 void loop()
 {
+    uint32_t t_now = millis();
+
     m_client.loop();
 
     // Publish to discovery channel every 5 seconds
+    static uint32_t t_dscvr = 0;
+    if (t_now - t_dscvr > 5000)
+    {
+        static char dscvr_msg[101]; // Max + NULL
+        snprintf(dscvr_msg, 100, "MAC: 00:00:00:00:00:01, IP: 192.168.1.1");
+        m_client.publish(m_topic_discover, dscvr_msg);
+        t_dscvr = t_now;
+    }
 }
