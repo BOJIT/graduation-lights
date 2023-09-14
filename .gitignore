@@ -1,3 +1,4 @@
+# SvelteKit
 .DS_Store
 node_modules
 /build
@@ -9,6 +10,16 @@ node_modules
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+# PlatformIO
+.pio
+.vscode/.browse.c_cpp.db*
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/ipch
+secrets.ini
+
+# VSCode Snippets
 .vscode/settings.json
 .vscode/svelte.code-snippets
 .vscode/javascript.code-snippets
+.vscode/cpp.code-snippets
