@@ -33,10 +33,18 @@
 
     /*-------------------------------- Methods -------------------------------*/
 
+    async function setState() {
+        const commandString = `m:${mode}\nh:${hex}`;
+
+        await mqttClient.publish("command", commandString);
+    }
+
     /*------------------------------- Lifecycle ------------------------------*/
+
     onMount(async () => {
         // Connect to MQTT Broker
         await mqttClient.connect();
+        await mqttClient.subscribe("command");
     });
 </script>
 
@@ -65,6 +73,7 @@
                 add={mode === o ? "bg-primary-trans" : ""}
                 on:click={() => {
                     mode = o;
+                    setState();
                 }}><h2>{o}</h2></Button
             >
         {/each}

@@ -21,13 +21,20 @@ let client: mqtt.MqttClient | null = null;
 /*------------------------------- Functions ----------------------------------*/
 
 async function connect() {
+    // Connect to broker
     if (import.meta.env.PROD) {
-        client = await mqtt.connectAsync("wss://broker.hivemq.com:8884");
+        client = await mqtt.connectAsync("wss://broker.emqx.io:8084/mqtt");
     } else {
-        client = await mqtt.connectAsync("ws://broker.hivemq.com:8000");
+        client = await mqtt.connectAsync("ws://broker.emqx.io:8083/mqtt");
     }
 
-    console.log(client);
+    // Set up message handler
+    client.on('message', function (topic, payload, packet) {
+        // Payload is Buffer
+        console.log(`Topic: ${topic}, Message: ${payload.toString()}`)
+    })
+
+    return client;
 }
 
 async function publish(subtopic: string, message: string) {
@@ -36,8 +43,12 @@ async function publish(subtopic: string, message: string) {
     await client.publishAsync(`${TOPIC_PREFIX}/${subtopic}`, message);
 }
 
-async function subscribe() { }
+async function subscribe(subtopic: string) {
+    if (client === null) return;
+
+    return await client.subscribeAsync(`${TOPIC_PREFIX}/${subtopic}`);
+}
 
 /*-------------------------------- Exports -----------------------------------*/
 
-export default { connect, publish };
+export default { connect, publish, subscribe };
