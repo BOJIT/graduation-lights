@@ -13,11 +13,8 @@
 
     import { onMount } from "svelte";
 
-    import { SearchableList } from "@bojit/svelte-components/form";
     import { Content } from "@bojit/svelte-components/layout";
     import { Button } from "@bojit/svelte-components/smelte";
-
-    import { ColorPalette, Moon } from "@svicons/ionicons-outline";
 
     import ColorPicker from "svelte-awesome-color-picker";
 
@@ -29,24 +26,6 @@
 
     let options = ["Off", "Pattern 1", "Pattern 2", "Pattern 3", "Pattern 4"];
     let mode: string = "Off";
-
-    // let options = {
-    //     Off: {
-    //         icon: Moon,
-    //     },
-    //     "Pattern 1": {
-    //         icon: ColorPalette,
-    //     },
-    //     "Pattern 2": {
-    //         icon: ColorPalette,
-    //     },
-    //     "Pattern 3": {
-    //         icon: ColorPalette,
-    //     },
-    //     "Pattern 4": {
-    //         icon: ColorPalette,
-    //     },
-    // };
 
     let hex: string = "#0000FF"; // or hsv or hex
 
@@ -66,19 +45,18 @@
     <h2>Graduation Lights</h2>
     <hr />
 
+    <h4>Change Colour</h4>
+    <hr />
+
+    <div class="picker">
+        <ColorPicker bind:hex isAlpha={false} label="Theme Colour" />
+    </div>
+
     <h4>Change Pattern</h4>
     <hr />
 
-    <!-- <SearchableList items={options} /> -->
-
     <div class="buttons">
         {#each options as o}
-            <!-- <TextIconButton
-                icon={ColorPalette}
-                label={o}
-                shape="rounded"
-                color={mode === o ? "primary" : "secondary"}
-            /> -->
             <Button
                 outlined
                 add={mode === o ? "bg-primary-trans" : ""}
@@ -88,14 +66,6 @@
             >
         {/each}
     </div>
-    <hr />
-
-    <ColorPicker
-        bind:hex
-        isAlpha={false}
-        isPopup={false}
-        label="Theme Colour"
-    />
 </Content>
 
 <style>
@@ -116,5 +86,16 @@
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+    }
+
+    .picker {
+        display: flex;
+        align-items: center;
+        /* justify-content: center; */
+        padding: 1rem;
+    }
+
+    .picker :global(.color-picker > .wrapper) {
+        margin-top: 0.5rem;
     }
 </style>
