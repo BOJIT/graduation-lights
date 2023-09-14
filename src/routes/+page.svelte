@@ -29,7 +29,7 @@
     let options = ["Off", "Pattern 1", "Pattern 2", "Pattern 3", "Pattern 4"];
     let mode: string = "Off";
 
-    let hex: string = "#0000FF"; // or hsv or hex
+    let hex: string = "#0000ff"; // or hsv or hex
 
     /*-------------------------------- Methods -------------------------------*/
 
