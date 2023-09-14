@@ -18,6 +18,8 @@
 
     import ColorPicker from "svelte-awesome-color-picker";
 
+    import mqttClient from "$lib/mqttClient";
+
     /*--------------------------------- Types --------------------------------*/
 
     // type Mode = "Off" | "Pattern 1" | "Pattern 2" | "Pattern 3" | "Pattern 4";
@@ -32,8 +34,9 @@
     /*-------------------------------- Methods -------------------------------*/
 
     /*------------------------------- Lifecycle ------------------------------*/
-    onMount(() => {
-        // Subscribe to MQTT Broker
+    onMount(async () => {
+        // Connect to MQTT Broker
+        await mqttClient.connect();
     });
 </script>
 
