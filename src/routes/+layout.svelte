@@ -16,7 +16,7 @@
     import palette from "$lib/palette";
 
     const mode = Theme.Mode;
-    $mode = "auto"; // Default Mode if no stored state is present
+    $mode = "light"; // Default Mode if no stored state is present
 </script>
 
 <App theme={palette}>
