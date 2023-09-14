@@ -12,7 +12,15 @@
 
 import * as mqtt from 'mqtt/dist/mqtt.min';
 
-import { writable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
+
+/*--------------------------------- Types ------------------------------------*/
+
+type SystemState = {
+    mode: string,
+    colour: string,
+    syncState: boolean;
+};
 
 /*--------------------------------- State ------------------------------------*/
 
@@ -21,6 +29,12 @@ const TOPIC_PREFIX = "DIET-4073c85645649a02734";
 let client: mqtt.MqttClient | null = null;
 
 let devices: Writable<Set<string>> = writable(new Set([]));
+
+let state: Writable<SystemState> = writable({
+    mode: "Off",
+    colour: "#0000FF",
+    syncState: false,
+});
 
 /*------------------------------- Functions ----------------------------------*/
 
@@ -33,15 +47,28 @@ async function connect() {
     }
 
     // Core subtopics
-    await subscribe("discover");
+    await subscribe("discover");    // Gets light addresses + status
+    await subscribe("command");    // Gets commands sent by other browsers
 
     // Set up message handler
     client.on('message', function (topic, payload, packet) {
 
         // Add discovery entries to set
         if (topic === `${TOPIC_PREFIX}/discover`) {
+            const msg = JSON.parse(payload.toString());
+
+            if (get(state).syncState === false) {
+                // If this is the first light discovery, update the app state
+                state.update((s) => {
+                    s.mode = msg.mode;
+                    s.colour = msg.colour;
+                    s.syncState = true;
+                    return s;
+                });
+            }
+
             devices.update((d) => {
-                d.add(payload.toString());
+                d.add(msg.mac);
                 return d;
             });
             // TODO add callback after 20 seconds to remove from list if not heard from
@@ -70,6 +97,6 @@ async function subscribe(subtopic: string) {
 
 /*-------------------------------- Exports -----------------------------------*/
 
-export { devices };
+export { devices, state };
 
 export default { connect, publish, subscribe };

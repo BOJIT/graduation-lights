@@ -18,27 +18,27 @@
 
     import ColorPicker from "svelte-awesome-color-picker";
 
-    import mqttClient from "$lib/mqttClient";
+    import mqttClient, { state } from "$lib/mqttClient";
 
     /*--------------------------------- Props --------------------------------*/
 
     let options = ["Off", "Pattern 1", "Pattern 2", "Pattern 3", "Pattern 4"];
-    let mode: string = "Off";
-
-    let hex: string = "#0000ff"; // or hsv or hex
 
     let messageTimeout: number | null = null;
 
     /*-------------------------------- Methods -------------------------------*/
 
     async function setState() {
-        const commandString = `mode :${mode}, colour :${hex}`;
+        const command = {
+            mode: $state.mode,
+            colour: $state.colour,
+        };
 
         if (messageTimeout !== null) window.clearTimeout(messageTimeout);
 
         // Buffer sends to avoid sluggish reponse
         messageTimeout = window.setTimeout(async () => {
-            await mqttClient.publish("command", commandString);
+            await mqttClient.publish("command", JSON.stringify(command));
             messageTimeout = null;
         }, 300);
     }
@@ -48,9 +48,11 @@
     onMount(async () => {
         // Connect to MQTT Broker
         await mqttClient.connect();
-        await mqttClient.subscribe("command");
-        await mqttClient.subscribe("discover");
     });
+
+    // state.subscribe((s) => {
+    //     setState(s);
+    // });
 </script>
 
 <svelte:head>
@@ -66,7 +68,7 @@
 
     <div class="picker">
         <ColorPicker
-            bind:hex
+            bind:hex={$state.colour}
             isAlpha={false}
             label="Theme Colour"
             on:input={() => {
@@ -82,9 +84,9 @@
         {#each options as o}
             <Button
                 outlined
-                add={mode === o ? "bg-primary-trans" : ""}
+                add={$state.mode === o ? "bg-primary-trans" : ""}
                 on:click={() => {
-                    mode = o;
+                    $state.mode = o;
                     setState();
                 }}><h2>{o}</h2></Button
             >

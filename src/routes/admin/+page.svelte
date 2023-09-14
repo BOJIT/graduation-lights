@@ -40,7 +40,6 @@
     onMount(async () => {
         // Connect to MQTT Broker
         await mqttClient.connect();
-        await mqttClient.subscribe("command");
     });
 </script>
 
