@@ -31,12 +31,20 @@
 
     let hex: string = "#0000ff"; // or hsv or hex
 
+    let messageTimeout: number | null = null;
+
     /*-------------------------------- Methods -------------------------------*/
 
     async function setState() {
         const commandString = `m:${mode}\nh:${hex}`;
 
-        await mqttClient.publish("command", commandString);
+        if (messageTimeout !== null) window.clearTimeout(messageTimeout);
+
+        // Buffer sends to avoid sluggish reponse
+        messageTimeout = window.setTimeout(async () => {
+            await mqttClient.publish("command", commandString);
+            messageTimeout = null;
+        }, 300);
     }
 
     /*------------------------------- Lifecycle ------------------------------*/
@@ -60,7 +68,14 @@
     <hr />
 
     <div class="picker">
-        <ColorPicker bind:hex isAlpha={false} label="Theme Colour" />
+        <ColorPicker
+            bind:hex
+            isAlpha={false}
+            label="Theme Colour"
+            on:input={() => {
+                setState();
+            }}
+        />
     </div>
 
     <h4>Change Pattern</h4>
