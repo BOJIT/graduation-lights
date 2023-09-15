@@ -22,7 +22,7 @@
 
     /*--------------------------------- Props --------------------------------*/
 
-    let options = ["Off", "Pattern 1", "Pattern 2", "Pattern 3", "Pattern 4"];
+    let options = ["Off", "Solid", "Fire", "Chase", "Rainbow"];
 
     let messageTimeout: number | null = null;
 
@@ -49,10 +49,6 @@
         // Connect to MQTT Broker
         await mqttClient.connect();
     });
-
-    // state.subscribe((s) => {
-    //     setState(s);
-    // });
 </script>
 
 <svelte:head>
