@@ -18,7 +18,7 @@
     import { SearchableList } from "@bojit/svelte-components/form";
     import { Content } from "@bojit/svelte-components/layout";
 
-    import mqttClient, { devices } from "$lib/mqttClient";
+    import mqttClient, { devices, state } from "$lib/mqttClient";
     import { Switch } from "@bojit/svelte-components/smelte";
 
     /*--------------------------------- Props --------------------------------*/
@@ -33,7 +33,26 @@
         return o;
     });
 
+    let messageTimeout: number | null = null;
+
     /*-------------------------------- Methods -------------------------------*/
+
+    async function setState() {
+        const command = {
+            mode: $state.mode,
+            colour: $state.colour,
+            enable: $state.enable,
+            lock: $state.lock,
+        };
+
+        if (messageTimeout !== null) window.clearTimeout(messageTimeout);
+
+        // Buffer sends to avoid sluggish reponse
+        messageTimeout = window.setTimeout(async () => {
+            await mqttClient.publish("command", JSON.stringify(command));
+            messageTimeout = null;
+        }, 300);
+    }
 
     /*------------------------------- Lifecycle ------------------------------*/
 
@@ -53,8 +72,16 @@
 
     <h4>Overrides</h4>
     <hr />
-    <Switch label="Enable Lights" />
-    <Switch label="Lock Settings" />
+    <Switch
+        label="Enable Lights"
+        bind:value={$state.enable}
+        on:change={setState}
+    />
+    <Switch
+        label="Lock Settings"
+        bind:value={$state.lock}
+        on:change={setState}
+    />
     <br /><br />
 
     <h4>Connected Devices ({$devices.size})</h4>
