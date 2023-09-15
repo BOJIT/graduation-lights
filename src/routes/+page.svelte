@@ -22,7 +22,7 @@
 
     /*--------------------------------- Props --------------------------------*/
 
-    let options = ["Off", "Solid", "Fire", "Chase", "Rainbow"];
+    let options = ["Off", "Solid", "Fire", "Sparkle", "Calming", "Rainbow"];
 
     let messageTimeout: number | null = null;
 
