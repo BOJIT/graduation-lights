@@ -17,6 +17,8 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
+#include "leds.h"
+
 /*---------------------------- Macros & Constants ----------------------------*/
 
 /*----------------------------------- State ----------------------------------*/
@@ -40,6 +42,11 @@ static PubSubClient m_client(m_espClient);
 
 static char m_jsonBuf[512];
 
+/** Enumerations
+ * Off
+ * Solid
+ * Fire
+ */
 static char m_mode[32] = "Off";
 static uint8_t m_colours[3] = {0, 0, 0};
 
@@ -84,11 +91,11 @@ static void callback(char *topic, byte *payload, unsigned int length)
     strcpy(m_mode, mode); // Assumes no overflow
     str_to_colour(colour, m_colours);
 
-    Serial.print("Message arrived in topic: ");
-    Serial.println(topic);
-    Serial.printf("Mode: %s\r\n", mode);
-    Serial.printf("Mode: %s\r\n", colour);
-    Serial.println();
+    // Serial.print("Message arrived in topic: ");
+    // Serial.println(topic);
+    // Serial.printf("Mode: %s\r\n", mode);
+    // Serial.printf("Mode: %s\r\n", colour);
+    // Serial.println();
 }
 
 static void compose_json(void)
@@ -116,6 +123,8 @@ void setup()
 
     Serial.print("Device MAC Address: ");
     Serial.println(WiFi.macAddress());
+
+    leds_initialise();
 
     /*------------------------------------------------------------------------*/
 
@@ -148,6 +157,8 @@ void setup()
         delay(1000);
     }
 
+    digitalWrite(LED_BUILTIN, LOW);
+
     /*------------------------------------------------------------------------*/
 
     // Subscribe to topic sets
@@ -160,6 +171,38 @@ void loop()
     uint32_t t_now = millis();
 
     m_client.loop();
+
+    static uint32_t t_render = 0;
+    if (t_now - t_render > 20)
+    {
+        if (!strcmp(m_mode, "Off"))
+        {
+            leds_pattern_off();
+        }
+        else if (!strcmp(m_mode, "Solid"))
+        {
+            leds_pattern_solid(m_colours);
+        }
+        else if (!strcmp(m_mode, "Fire"))
+        {
+            leds_pattern_fire();
+        }
+        else if (!strcmp(m_mode, "Sparkle"))
+        {
+            leds_pattern_sparkle(m_colours);
+        }
+        else if (!strcmp(m_mode, "Calming"))
+        {
+            leds_pattern_calming();
+        }
+        else if (!strcmp(m_mode, "Rainbow"))
+        {
+            leds_pattern_rainbow();
+        }
+
+        leds_render();
+        t_render = t_now;
+    }
 
     // Publish to discovery channel every 5 seconds
     static uint32_t t_dscvr = 0;
