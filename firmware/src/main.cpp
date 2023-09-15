@@ -49,6 +49,8 @@ static char m_jsonBuf[512];
  */
 static char m_mode[32] = "Off";
 static uint8_t m_colours[3] = {0, 0, 0};
+static bool m_enable = true; // Global lights override
+static bool m_lock = false;  // Global settings lock
 
 /*------------------------------ Private Functions ---------------------------*/
 
@@ -81,20 +83,27 @@ static void callback(char *topic, byte *payload, unsigned int length)
 
     const char *mode = doc["mode"];
     const char *colour = doc["colour"];
+    bool enable = doc["enable"];
+    bool lock = doc["lock"];
 
-    if (mode == nullptr)
+    if (mode == nullptr) // Not for us
         return;
 
-    if (colour == nullptr)
-        return;
+    m_enable = enable;
+    m_lock = lock;
 
-    strcpy(m_mode, mode); // Assumes no overflow
-    str_to_colour(colour, m_colours);
+    if (!m_lock)
+    {
+        strcpy(m_mode, mode); // Assumes no overflow
+        str_to_colour(colour, m_colours);
+    }
 
     // Serial.print("Message arrived in topic: ");
     // Serial.println(topic);
     // Serial.printf("Mode: %s\r\n", mode);
-    // Serial.printf("Mode: %s\r\n", colour);
+    // Serial.printf("Colour: %s\r\n", colour);
+    // Serial.printf("Enable: %u\r\n", enable);
+    // Serial.printf("Lock: %u\r\n", lock);
     // Serial.println();
 }
 
@@ -109,6 +118,8 @@ static void compose_json(void)
     char col_string[16];
     colour_to_str(m_colours, col_string);
     doc["colour"] = col_string;
+    doc["enable"] = m_enable;
+    doc["lock"] = m_lock;
 
     serializeJson(doc, m_jsonBuf);
 }
@@ -175,7 +186,7 @@ void loop()
     static uint32_t t_render = 0;
     if (t_now - t_render > 20)
     {
-        if (!strcmp(m_mode, "Off"))
+        if (!strcmp(m_mode, "Off") || (m_enable == false))
         {
             leds_pattern_off();
         }
