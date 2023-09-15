@@ -34,8 +34,6 @@
         const command = {
             mode: $state.mode,
             colour: $state.colour,
-            enable: $state.enable,
-            lock: $state.lock,
         };
 
         if (messageTimeout !== null) window.clearTimeout(messageTimeout);

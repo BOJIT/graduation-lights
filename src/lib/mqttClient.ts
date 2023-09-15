@@ -66,8 +66,10 @@ async function connect() {
                 state.update((s) => {
                     s.mode = msg.mode;
                     s.colour = msg.colour;
-                    s.enable = msg.enable;
-                    s.lock = msg.lock;
+                    if (msg.enable)
+                        s.enable = msg.enable;
+                    if (msg.lock)
+                        s.lock = msg.lock;
                     s.syncState = true;
                     return s;
                 });
@@ -86,8 +88,10 @@ async function connect() {
             state.update((s) => {
                 s.mode = msg.mode;
                 s.colour = msg.colour;
-                s.enable = msg.enable;
-                s.lock = msg.lock;
+                if (msg.enable)
+                    s.enable = msg.enable;
+                if (msg.lock)
+                    s.lock = msg.lock;
                 return s;
             });
         } else {
