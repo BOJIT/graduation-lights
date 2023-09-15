@@ -16,6 +16,8 @@
     import { Content } from "@bojit/svelte-components/layout";
     import { Button } from "@bojit/svelte-components/smelte";
 
+    import { Warning } from "@svicons/ionicons-outline";
+
     import ColorPicker from "svelte-awesome-color-picker";
 
     import mqttClient, { state } from "$lib/mqttClient";
@@ -59,35 +61,42 @@
     <h2>Graduation Lights</h2>
     <hr />
 
-    <h4>Change Colour</h4>
-    <hr />
+    {#if $state.enable && !$state.lock}
+        <h4>Change Colour</h4>
+        <hr />
 
-    <div class="picker">
-        <ColorPicker
-            bind:hex={$state.colour}
-            isAlpha={false}
-            label="Theme Colour"
-            on:input={() => {
-                setState();
-            }}
-        />
-    </div>
-
-    <h4>Change Pattern</h4>
-    <hr />
-
-    <div class="buttons">
-        {#each options as o}
-            <Button
-                outlined
-                add={$state.mode === o ? "bg-primary-trans" : ""}
-                on:click={() => {
-                    $state.mode = o;
+        <div class="picker">
+            <ColorPicker
+                bind:hex={$state.colour}
+                isAlpha={false}
+                label="Theme Colour"
+                on:input={() => {
                     setState();
-                }}><h2>{o}</h2></Button
-            >
-        {/each}
-    </div>
+                }}
+            />
+        </div>
+
+        <h4>Change Pattern</h4>
+        <hr />
+
+        <div class="buttons">
+            {#each options as o}
+                <Button
+                    outlined
+                    add={$state.mode === o ? "bg-primary-trans" : ""}
+                    on:click={() => {
+                        $state.mode = o;
+                        setState();
+                    }}><h2>{o}</h2></Button
+                >
+            {/each}
+        </div>
+    {:else}
+        <div class="warn">
+            <Warning />
+        </div>
+        <h2 style:color="red">Light Control is Disabled!</h2>
+    {/if}
 </Content>
 
 <style>
@@ -119,5 +128,12 @@
 
     .picker :global(.color-picker > .wrapper) {
         margin-top: 0.5rem;
+    }
+
+    .warn {
+        display: flex;
+        justify-content: center;
+        max-height: 6rem;
+        margin: 1rem;
     }
 </style>

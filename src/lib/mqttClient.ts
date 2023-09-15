@@ -19,6 +19,8 @@ import { get, writable, type Writable } from 'svelte/store';
 type SystemState = {
     mode: string,
     colour: string,
+    enable: true,
+    lock: false,
     syncState: boolean;
 };
 
@@ -33,6 +35,8 @@ let devices: Writable<Set<string>> = writable(new Set([]));
 let state: Writable<SystemState> = writable({
     mode: "Off",
     colour: "#0000FF",
+    enable: true,
+    lock: false,
     syncState: false,
 });
 
@@ -62,6 +66,10 @@ async function connect() {
                 state.update((s) => {
                     s.mode = msg.mode;
                     s.colour = msg.colour;
+                    if (msg.enable)
+                        s.enable = msg.enable;
+                    if (msg.lock)
+                        s.lock = msg.lock;
                     s.syncState = true;
                     return s;
                 });
@@ -80,6 +88,10 @@ async function connect() {
             state.update((s) => {
                 s.mode = msg.mode;
                 s.colour = msg.colour;
+                if (msg.enable)
+                    s.enable = msg.enable;
+                if (msg.lock)
+                    s.lock = msg.lock;
                 return s;
             });
         } else {
