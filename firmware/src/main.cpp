@@ -83,14 +83,18 @@ static void callback(char *topic, byte *payload, unsigned int length)
 
     const char *mode = doc["mode"];
     const char *colour = doc["colour"];
-    bool enable = doc["enable"];
-    bool lock = doc["lock"];
+
+    if (doc.containsKey("enable"))
+    {
+        bool enable = doc["enable"];
+        bool lock = doc["lock"];
+
+        m_enable = enable;
+        m_lock = lock;
+    }
 
     if (mode == nullptr) // Not for us
         return;
-
-    m_enable = enable;
-    m_lock = lock;
 
     if (!m_lock)
     {
