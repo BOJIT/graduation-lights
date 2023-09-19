@@ -17,7 +17,7 @@
 #define LED_PIN 0
 #define COLOR_ORDER GRB
 #define CHIPSET WS2812B
-#define NUM_LEDS 6
+#define NUM_LEDS 15
 
 // Pattern Definitions
 #define COOLING 2
