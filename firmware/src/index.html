@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html>
+
+<body>
+    <h1>AP Credentials</h1>
+
+    <form action='/creds' method='post'>
+        <input name='ssid' placeholder='SSID' autocapitalize='none'></input>
+        <input name='psk' placeholder='Password' autocapitalize='none'></input>
+
+        <button type='submit'>Submit</button>
+    </form>
+
+</body>
+
+<style>
+    body * {
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    input {
+        height: 4rem;
+        font-size: 2.5rem;
+    }
+
+    button {
+        height: 6rem;
+        font-size: 2.5rem;
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 5rem;
+    }
+</style>
+
+</html>

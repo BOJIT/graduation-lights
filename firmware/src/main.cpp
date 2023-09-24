@@ -18,6 +18,7 @@
 #include <PubSubClient.h>
 
 #include "leds.h"
+#include "server.h"
 
 /*---------------------------- Macros & Constants ----------------------------*/
 
@@ -42,13 +43,8 @@ static PubSubClient m_client(m_espClient);
 
 static char m_jsonBuf[512];
 
-/** Enumerations
- * Off
- * Solid
- * Fire
- */
-static char m_mode[32] = "Off";
-static uint8_t m_colours[3] = {0, 0, 0};
+static char m_mode[32] = "Solid";
+static uint8_t m_colours[3] = {6, 15, 141};
 static bool m_enable = true; // Global lights override
 static bool m_lock = false;  // Global settings lock
 
@@ -58,7 +54,6 @@ static void str_to_colour(const char *str, uint8_t *cols)
 {
     // Assume string takes form #00FF00, etc... and is NULL-terminated
     const char *ptr = &(str[1]);
-
     int r, g, b; // Will be less than uint8_t
 
     // NOTE this has no error handling!
@@ -143,13 +138,29 @@ void setup()
 
     /*------------------------------------------------------------------------*/
 
+    // Set to institute blue while connecting...
+    leds_pattern_solid(m_colours);
+    leds_render();
+
     // connect to the WiFi network
     WiFi.begin(m_ssid, m_psk);
+    uint32_t t_now = millis();
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(500);
         Serial.println("Connecting to WiFi...");
         digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+
+        // if (millis() - t_now > 30000)
+        if (millis() - t_now > 1000)
+        {
+            Serial.println("Could not connect - create soft AP");
+            server_initialise("GRADUATION-LIGHTS");
+            while (1)
+            {
+                server_loop();
+            }
+        }
     }
 
     Serial.printf("Connected to the WiFi network: %s\r\n", m_ssid);
