@@ -20,8 +20,9 @@
 const char *server_get_ssid(void);
 const char *server_get_psk(void);
 
+void server_initialise(void);
 void server_loop(void);
-void server_initialise(const char *ap_prefix);
+void server_launch_ap(const char *ap_prefix);
 
 /*----------------------------------------------------------------------------*/
 

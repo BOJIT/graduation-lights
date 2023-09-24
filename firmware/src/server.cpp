@@ -15,7 +15,7 @@
 #include <DNSServer.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-#include <FS.h>
+#include <LittleFS.h>
 
 /*---------------------------- Macros & Constants ----------------------------*/
 
@@ -26,8 +26,16 @@ static DNSServer m_dnsServer;
 static IPAddress m_apIP(192, 168, 1, 1);
 
 // clang-format off
-static const char *m_index = "<!DOCTYPE HTML><html><body> <h1>AP Credentials</h1> <form action='/creds' method='post'> <input name='ssid' placeholder='SSID' autocapitalize='none'></input> <input name='psk' placeholder='Password' autocapitalize='none'></input> <button type='submit'>Submit</button> </form></body><style>body *{font-family: 'Courier New', Courier, monospace;}form{display: flex; flex-direction: column; gap: 1rem;}input{height: 4rem; font-size: 2.5rem;}button{height: 6rem; font-size: 2.5rem;}h1{text-align: center; font-size: 5rem;}</style></html>";
+static const char *m_index = "<!DOCTYPE HTML><html><body> <h1>AP Credentials</h1> <form action='/creds' method='post'> <input name='ssid' placeholder='SSID' autocapitalize='none'></input> <input name='psk' placeholder='Password' autocapitalize='none'></input> <button type='submit'>Submit</button> </form></body><style>body *{font-family: 'Courier New', Courier, monospace;}form{display: flex; flex-direction: column; gap: 1rem;}input{height: 6rem; font-size: 4rem;}button{height: 6rem; font-size: 2.5rem;}h1{text-align: center; font-size: 5rem;}</style></html>";
 // clang-format on
+
+// Hardcoded credentials - should be declared in secrets.ini
+static const char *m_ssid = WIFI_SSID;
+static const char *m_psk = WIFI_PSK;
+
+// Buffers for filesystem credentials
+static char m_ssid_buf[256];
+static char m_psk_buf[256];
 
 /*------------------------------ Private Functions ---------------------------*/
 
@@ -61,6 +69,20 @@ static void handleCredentials()
 
     m_espServer.sendHeader("Location", String("/"), true);
     m_espServer.send(302, "text/plain", "");
+
+    if (ssid.length() == 0 || psk.length() == 0)
+        return;
+
+    File f1 = LittleFS.open("/ssid.txt", "w");
+    f1.print(ssid.c_str());
+    f1.flush();
+    f1.close();
+    File f2 = LittleFS.open("/psk.txt", "w");
+    f2.print(psk.c_str());
+    f1.flush();
+    f2.close();
+
+    ESP.restart();
 }
 
 /*------------------------------- Public Functions ---------------------------*/
@@ -75,16 +97,30 @@ void server_loop(void)
 const char *server_get_ssid(void)
 {
     // Return stored creds, or hardcoded defaults
-    return nullptr;
+    File f = LittleFS.open("/ssid.txt", "r");
+    if (!f)
+        return m_ssid;
+
+    f.readBytes(m_ssid_buf, sizeof(m_ssid_buf));
+    f.close();
+
+    return m_ssid_buf;
 }
 
 const char *server_get_psk(void)
 {
     // Return stored creds, or hardcoded defaults
-    return nullptr;
+    File f = LittleFS.open("/psk.txt", "r");
+    if (!f)
+        return m_psk;
+
+    f.readBytes(m_psk_buf, sizeof(m_psk_buf));
+    f.close();
+
+    return m_psk_buf;
 }
 
-void server_initialise(const char *ap_prefix)
+void server_launch_ap(const char *ap_prefix)
 {
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(m_apIP, m_apIP, IPAddress(255, 255, 255, 0));
@@ -112,5 +148,10 @@ void server_initialise(const char *ap_prefix)
 
     m_espServer.begin();
 }
+
+void server_initialise(void)
+{
+    LittleFS.begin();
+};
 
 /*----------------------------------------------------------------------------*/

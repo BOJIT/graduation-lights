@@ -24,10 +24,6 @@
 
 /*----------------------------------- State ----------------------------------*/
 
-// WiFi
-static const char *m_ssid = WIFI_SSID; // Enter your WiFi name
-static const char *m_psk = WIFI_PSK;   // Enter WiFi password
-
 // MQTT Broker
 static const char *m_broker = "broker.emqx.io";
 static const char *m_broker_username = "emqx";
@@ -131,10 +127,12 @@ void setup()
     Serial.begin(115200);
     pinMode(LED_BUILTIN, OUTPUT);
 
+    Serial.println("------------------");
     Serial.print("Device MAC Address: ");
     Serial.println(WiFi.macAddress());
 
     leds_initialise();
+    server_initialise();
 
     /*------------------------------------------------------------------------*/
 
@@ -142,8 +140,10 @@ void setup()
     leds_pattern_solid(m_colours);
     leds_render();
 
+    Serial.printf("WiFi Credentials: %s, %s\r\n", server_get_ssid(), server_get_psk());
+
     // connect to the WiFi network
-    WiFi.begin(m_ssid, m_psk);
+    WiFi.begin(server_get_ssid(), server_get_psk());
     uint32_t t_now = millis();
     while (WiFi.status() != WL_CONNECTED)
     {
@@ -151,11 +151,10 @@ void setup()
         Serial.println("Connecting to WiFi...");
         digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 
-        // if (millis() - t_now > 30000)
-        if (millis() - t_now > 1000)
+        if (millis() - t_now > 20000)
         {
             Serial.println("Could not connect - create soft AP");
-            server_initialise("GRADUATION-LIGHTS");
+            server_launch_ap("GRADUATION-LIGHTS");
             while (1)
             {
                 server_loop();
@@ -163,7 +162,7 @@ void setup()
         }
     }
 
-    Serial.printf("Connected to the WiFi network: %s\r\n", m_ssid);
+    Serial.printf("Connected to the WiFi network: %s\r\n", server_get_ssid());
 
     /*------------------------------------------------------------------------*/
 
