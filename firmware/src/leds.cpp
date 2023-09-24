@@ -20,8 +20,7 @@
 #define NUM_LEDS 15
 
 // Pattern Definitions
-#define COOLING 2
-#define SPARKING 30
+#define SPARKING 60
 
 /*----------------------------------- State ----------------------------------*/
 
@@ -116,20 +115,20 @@ void leds_pattern_fire(void)
     // Step 1.  Cool down every cell a little
     for (int i = 0; i < NUM_LEDS; i++)
     {
-        heat[i] = qsub8(heat[i], random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
+        heat[i] = qsub8(heat[i], 1);
     }
 
-    // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-    for (int k = NUM_LEDS - 1; k >= 2; k--)
-    {
-        heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
-    }
+    // // Step 2.  Heat from each cell drifts 'up' and diffuses a little
+    // for (int k = NUM_LEDS - 1; k >= 2; k--)
+    // {
+    //     heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
+    // }
 
     // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
     if (random8() < SPARKING)
     {
-        int y = random8(7);
-        heat[y] = qadd8(heat[y], random8(160, 255));
+        int y = random8(NUM_LEDS - 1);
+        heat[y] = qadd8(heat[y], random8(190, 255));
     }
 
     // Step 4.  Map from heat cells to LED colors
