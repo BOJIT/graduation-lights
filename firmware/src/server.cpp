@@ -65,6 +65,9 @@ static void handleCredentials()
 {
     String ssid = m_espServer.arg("ssid");
     String psk = m_espServer.arg("psk");
+    ssid.trim();
+    psk.trim();
+
     Serial.printf("POST received: %s, %s\r\n", ssid.c_str(), psk.c_str());
 
     m_espServer.sendHeader("Location", String("/"), true);
